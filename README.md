@@ -1,70 +1,138 @@
-# Getting Started with Create React App
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
+### `yarn add`
 
 ### `yarn start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
 ### `yarn build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 脚手架搭建
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+`npx create-react-app my-app`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 安装 less
 
-### `yarn eject`
+`yarn add --dev less less-loader`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### 根路径下新增 config-overrides.js 修改默认配置
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+const {
+  override,
+  addLessLoader
+} = require('customize-cra');
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+module.exports = override(
+  addLessLoader(),
+);
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### 安装 antd-mobile
 
-## Learn More
+`yarn add antd-mobile`
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 使用按需加载
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+`yarn add babel-plugin-import --dev`
 
-### Code Splitting
+### 按需加载修改 config-overrides.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```
+const {
+  override,
+  addLessLoader,
+  fixBabelImports,
+} = require('customize-cra');
 
-### Analyzing the Bundle Size
+module.exports = override(
+  addLessLoader(),
+  fixBabelImports('import', {
+    libraryName: 'antd-mobile',
+    style: 'css',
+  })
+);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```
 
-### Making a Progressive Web App
+### 安装 router
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+`yarn add react-router-dom `
 
-### Advanced Configuration
+### config-overrides.js 添加别名配置
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```
+const path = require('path');
+const {
+  override,
+  addLessLoader,
+  fixBabelImports,
+  addWebpackAlias,
+} = require('customize-cra');
 
-### Deployment
+module.exports = override(
+  addLessLoader(),
+  fixBabelImports('import', {
+    libraryName: 'antd-mobile',
+    style: 'css',
+  }),
+  //   引入别名
+  addWebpackAlias({
+    '@': path.resolve(__dirname, 'src'),
+  })
+);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```
 
-### `yarn build` fails to minify
+### 根路径下新增route文件，并引入至App.js
+```
+import React from 'react';
+import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
+import Login from '@/pages/login';
+import PageNotFount from '@/pages/404';
+import Home from '@/pages/home';
+import Details from '@/pages/details';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+const routes = [
+  {
+    path: '/login',
+    component: Login,
+    exact: true,
+  },
+  {
+    path: '/404',
+    component: PageNotFount,
+    exact: true,
+  },
+  {
+    path: '/',
+    component: Home,
+    exact: true,
+  },
+  {
+    path: '/home',
+    component: Home,
+    exact: true,
+  },
+  {
+    path: '/details',
+    component: Details,
+    exact: true,
+  },
+];
+
+export default function RoutesList() {
+  return (
+    <HashRouter>
+      <Switch>
+        {routes.map((route, index) => {
+          return route && route.Redirect ? (
+            <Redirect key={index} to={route.Redirect} />
+          ) : (
+            <Route key={route.path} {...route} />
+          );
+        })}
+        <Redirect to="/404" />
+      </Switch>
+    </HashRouter>
+  );
+}
+
+```
